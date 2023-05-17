@@ -10,7 +10,7 @@ player.grounded = true
 player.x = 0
 player.y = 0
 
-function playerUpdate(dt)
+function player:update(dt)
     if player.body then
         local colliders = world:queryRectangleArea(player:getX() - 8, player:getY() + 15, 8, 2, {'Ground', 'Wood'})
         if #colliders > 0 then
@@ -55,10 +55,28 @@ function playerUpdate(dt)
             player.isMoving = true
             player.direction = -1
         end
+        if love.keyboard.isDown('space') then
+            if player.direction == 1 then 
+                local colliders = world:queryRectangleArea(px, py, 20, 2, {'Wood'--[[, 'Enemy']]})
+                for i,c in ipairs(colliders) do 
+                    -- wood.dead = true
+                    --e.dead = true
+                    c:destroy()
+                end 
+            end 
+            if player.direction == -1 then 
+                local colliders = world:queryRectangleArea(px - 16, py, 20, 2, {'Wood'--[[, 'Enemy']]})
+                for i,c in ipairs(colliders) do 
+                    -- wood.dead = true
+                    --e.dead = true
+                     c:destroy()
+                end 
+            end 
+        end 
     end 
 end 
 
-function drawPlayer()
+function player:draw()
     local px, py = player:getPosition()
     --love.graphics.rectangle('fill', px, py, 16, 30)
 end 

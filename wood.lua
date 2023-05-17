@@ -3,13 +3,15 @@
 woods = {}
 
 function spawnWood(x, y, width, height)
-    local wood = world:newRectangleCollider(x, y, width, height, {collision_class = "Wood"})
-    wood:setObject(self)
-    wood:setType('static')
+    local wood = {}
+    local woodCollider = world:newRectangleCollider(x, y, width, height, {collision_class = "Wood"})
+    woodCollider:setObject(self)
+    wood.dead = false
+    woodCollider:setType('static')
     table.insert(woods, wood)
 end 
 
-function woodUpdate(dt)
+function woods:update(dt)
     local i = #woods
     for i=#woods,1,-1 do
         local w = woods[i]
@@ -18,3 +20,5 @@ function woodUpdate(dt)
         end
     end
 end 
+
+

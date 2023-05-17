@@ -9,8 +9,8 @@ return {
   height = 20,
   tilewidth = 16,
   tileheight = 16,
-  nextlayerid = 6,
-  nextobjectid = 11,
+  nextlayerid = 7,
+  nextobjectid = 13,
   properties = {},
   tilesets = {
     {
@@ -252,6 +252,35 @@ return {
     {
       type = "objectgroup",
       draworder = "topdown",
+      id = 6,
+      name = "Enemies",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 11,
+          name = "",
+          class = "",
+          shape = "rectangle",
+          x = 336,
+          y = 176,
+          width = 16,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
       id = 4,
       name = "start",
       class = "",
@@ -264,13 +293,13 @@ return {
       properties = {},
       objects = {
         {
-          id = 4,
+          id = 12,
           name = "",
           class = "",
           shape = "rectangle",
           x = 272,
           y = 128,
-          width = 32,
+          width = 16,
           height = 16,
           rotation = 0,
           visible = true,

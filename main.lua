@@ -1,8 +1,28 @@
 --[[ TODO:
 Initialize world and physics. DONE----
-Then we create a square for a player
-Add movement and physics with keypresses and windfield 
-Add a key for attacking which will query an area for collidable enemies.
+Then we create a square for a player DONE
+Add movement and physics with keypresses and windfield DONE
+Add a key for attacking which will query an area for collidable enemies. DONE
+
+    I have added stuff without the TODO but I am going to try to add more
+
+ADD FUNCTION TO FIND TILE ID AND REMOVE IT. (BREAKABLE TILES)
+    I KNOW THE FORUMS HAS ONE BUT IT MIGHT NOT SUIT MY NEEDS,
+    WE WILL DO SOME MORE RESEARCH.
+
+ADD PLAYER SPRITE AND ANIMATIONS. 
+    - GET SPRITE SHEET AND REST SHOULD BE EASY.
+    - WILL HAVE TO CHANGE THE QUERY HITBOXESTO FIT THE ATTACK
+        KEEP IN MIND DIRECTION NOW TOO MIGHT HAVE TO CHANGE COLLIDER SHAPE.
+    - SHOULD BE IT.
+
+EXTEND GAME WORLD 
+    - WE CAN DO THIS PRETTY EASILY IN TILED AND WE CAN POLISH LATER.
+    - ONCE WORLD GETS BIG ENOUGH TO AFFECT FPS WE CAN DO CHUNKS.
+
+REFACTORING!!!!!!!!
+    - MAKE CODE CLEANER AND EASY TO READ FOR MYSELF IN FUTURE.
+    - MAIN.LUA SHOULD BE CLEAN AND FUNCTIONAL.
 
 --]]
 
@@ -27,6 +47,15 @@ function love.load()
     world:addCollisionClass('Enemy')
 
 
+    sprites = {}
+    sprites.enemy = love.graphics.newImage('art/enemy2.png')
+
+    local enemyGrid = anim8.newGrid(16, 32, sprites.enemy:getWidth(), sprites.enemy:getHeight())
+    
+    animations = {}
+    animations.enemy = anim8.newAnimation(enemyGrid('1-2',1), 0.05)
+
+
     cam = cameraFile()
 
     grounds = {}
@@ -47,17 +76,15 @@ function love.load()
 
     -- loads the map from the save data 
     loadMap(saveData.currentLevel)
-
-    spawnEnemy(300, 100, 40, 40)
 end 
 
 function love.update(dt)
     -- update functions 
     world:update(dt)
     gameMap:update(dt)
-    playerUpdate(dt)
-    woodUpdate(dt)
-    enemyUpdate(dt)
+    player:update(dt)
+    woods:update(dt)
+    enemies:update(dt)
 
     local px, py = player:getPosition()
     cam:lookAt(px, love.graphics.getHeight()/2)
@@ -67,8 +94,9 @@ end
 function love.draw()
     cam:attach()
         gameMap:drawLayer(gameMap.layers["Tile Layer 1"])
-        drawPlayer()
+        player:draw()
         world:draw()
+        enemies:draw()
     cam:detach()
 end 
 
@@ -78,24 +106,6 @@ function love.keypressed(key)
             player:applyLinearImpulse(0, -200)
         end
     end
-    if key == 'space' then 
-        player.x = player:getX()
-        player.y = player:getY()
-        if player.direction == 1 then 
-            local colliders = world:queryRectangleArea(player.x, player.y, 20, 2, {'Wood'})
-            for i,c in ipairs(colliders) do 
-                wood.dead = true
-                c:destroy()
-            end 
-        end 
-        if player.direction == -1 then 
-            local colliders = world:queryRectangleArea(player.x - 16, player.y, 20, 2, {'Wood'})
-            for i,c in ipairs(colliders) do 
-                wood.dead = true
-                c:destroy()
-            end 
-        end 
-    end 
 end 
 
 -- We could possibly create a function that can make the process of spawning in collision classes less tedious. 
@@ -150,5 +160,9 @@ function loadMap(mapName)
     
     for i, obj in pairs (gameMap.layers["Wood"].objects) do 
         spawnWood(obj.x, obj.y, obj.width, obj.height)
+    end 
+
+    for i, obj in pairs (gameMap.layers["Enemies"].objects) do 
+        spawnEnemy(obj.x, obj.y, obj.width, obj.height, obj.args)
     end 
 end
