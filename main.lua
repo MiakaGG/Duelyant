@@ -26,27 +26,16 @@ REFACTORING!!!!!!!!
 
 --]]
 
-
-anim8 = require 'libraries/anim8/anim8'
-sti = require 'libraries/Simple-Tiled-Implementation/sti'
-cameraFile = require 'libraries/hump/camera'
-Timer = require 'libraries/hump/timer'
-
+require('require')
 
 function love.load()
-    -- initalize new windfield physics world and call method to enable debug drawing
     wf = require 'libraries/windfield/windfield'
     world = wf.newWorld(0, 800, false)
     world:setQueryDebugDrawing(true)
 
-    -- create classes to be able to use functions on different ones
-    world:addCollisionClass('Ground')
-    world:addCollisionClass('Player')
-    world:addCollisionClass('Wood')
-    world:addCollisionClass('Water')
-    world:addCollisionClass('Enemy')
-
-
+    -- cleaner functions
+    requireFiles()
+    createCollisionClasses()
     sprites = {}
     sprites.enemy = love.graphics.newImage('art/enemy2.png')
 
@@ -55,16 +44,10 @@ function love.load()
     animations = {}
     animations.enemy = anim8.newAnimation(enemyGrid('1-2',1), 0.05)
 
-
     cam = cameraFile()
 
     grounds = {}
     waters = {}
-
-    require('libraries/show')
-    require('player')
-    require('wood')
-    require('enemy')
 
     saveData = {}
     saveData.currentLevel = "map"
@@ -87,12 +70,13 @@ function love.update(dt)
     enemies:update(dt)
 
     local px, py = player:getPosition()
-    cam:lookAt(px, love.graphics.getHeight()/2)
+    cam:lookAt(px*2, love.graphics.getHeight()/2 - 130)
 
 end 
 
 function love.draw()
     cam:attach()
+        love.graphics.scale(2, 2)
         gameMap:drawLayer(gameMap.layers["Tile Layer 1"])
         player:draw()
         world:draw()
@@ -160,6 +144,7 @@ function loadMap(mapName)
     
     for i, obj in pairs (gameMap.layers["Wood"].objects) do 
         spawnWood(obj.x, obj.y, obj.width, obj.height)
+        local wx, wy = obj.x, obj.y     
     end 
 
     for i, obj in pairs (gameMap.layers["Enemies"].objects) do 
