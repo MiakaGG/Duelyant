@@ -1,81 +1,98 @@
-playerStartX = 500
-playerStartY = 100
-player = world:newRectangleCollider(playerStartX, playerStartY, 16, 30, {collision_class = "Player"})
-player:setFixedRotation(true)
-player.speed = 120
-player.isMoving = false
-player.direction = 1
-player.grounded = true
-player.x = 0
-player.y = 0
+Object = require('libraries/classic/classic')
+Player = Object:extend()
 
-function player:update(dt)
-    if player.body then
-        local colliders = world:queryRectangleArea(player:getX() - 8, player:getY() + 15, 8, 2, {'Ground', 'Wood'})
+function Player:new(x, y)
+    self.x = x or 0
+    self.y = y or 0
+    self.width = width or 16
+    self.height = height or 30
+    self.startX = startX or 500
+    self.startY = startY or 100
+    self.speed = speed or 120 
+    self.isMoving = isMoving or false
+    self.direction = direction or 1 
+    self.grounded = grounded or true 
+    self.collider = world:newRectangleCollider(self.startX, self.startY, 16, 30, {collision_class = "Player"})
+    self.collider:setFixedRotation(true)
+end
+
+function Player:update(dt)
+    if self.collider.body then
+        local colliders = world:queryRectangleArea(self.collider:getX() - 8, self.collider:getY() + 15, 8, 2, {'Ground', 'Wood'})
         if #colliders > 0 then
-            player.grounded = true
+            self.grounded = true
         else
-            player.grounded = false
+            self.grounded = false
         end
 
-        player.x = player:getX()
-        player.y = player:getY()
-
-           --[[ if player.direction == 1 then 
-                attackCollider = world:newRectangleCollider(player.x, player.y, 10, 2)
-                attackCollider:setCollisionClass('Melee')
-                Timer.after(1, function() attackCollider:destroy() end)
-                if attackCollider:enter('Wood') then
-                    local collision_data = attackCollider:getEnterCollisionData('Wood')
-                    local wood = collision_data.collider:getObject()
-                    wood:destroy()
-                    w.dead = true
-                end
-            elseif player.direction == -1 then 
-                attackCollider = world:newRectangleCollider(player.x - 16, player.y, 10, 2)
-                attackCollider:setCollisionClass('Melee')
-                if attackCollider:enter('Wood') then
-                    local collision_data = attackCollider:getEnterCollisionData('Wood')
-                    local wood = collision_data.collider:getObject()
-                    wood:destroy()
-                    w.dead = true
-                end
-            end --]]
-
-        player.isMoving = false
-        local px, py = player:getPosition()
+        self.isMoving = false
+        local px, py = self.collider:getPosition()
         if love.keyboard.isDown('right') then
-            player:setX(px + player.speed*dt)
-            player.isMoving = true
-            player.direction = 1
+            self.collider:setX(px + self.speed*dt)
+            self.isMoving = true
+            self.direction = 1
         end
         if love.keyboard.isDown('left') then
-            player:setX(px - player.speed*dt)
-            player.isMoving = true
-            player.direction = -1
+            self.collider:setX(px - self.speed*dt)
+            self.isMoving = true
+            self.direction = -1
         end
-        if love.keyboard.isDown('space') then
-            if player.direction == 1 then 
-                local colliders = world:queryRectangleArea(px, py, 20, 2, {'Wood'--[[, 'Enemy']]})
-                for i,c in ipairs(colliders) do 
-                    -- wood.dead = true
-                    --e.dead = true
+        if love.keyboard.isDown('y') then
+            if self.direction == 1 then 
+                local swordcolliders = world:queryRectangleArea(px, py, 20, 2, {'Wood', 'Enemy'})
+                for i,c in ipairs(swordcolliders) do 
                     c:destroy()
                 end 
             end 
-            if player.direction == -1 then 
-                local colliders = world:queryRectangleArea(px - 16, py, 20, 2, {'Wood'--[[, 'Enemy']]})
-                for i,c in ipairs(colliders) do 
-                    -- wood.dead = true
-                    --e.dead = true
+            if self.direction == -1 then 
+                local swordcolliders = world:queryRectangleArea(px - 16, py, 20, 2, {'Wood','Enemy'})
+                for i,c in ipairs(swordcolliders) do 
                      c:destroy()
                 end 
             end 
         end 
+        if love.keyboard.isDown('space') then
+            if Player.grounded then
+                Player.collider:applyLinearImpulse(0, -200)
+            end
+        end
     end 
 end 
 
-function player:draw()
-    local px, py = player:getPosition()
+function Player:draw()
+    local px, py = self.collider:getPosition()
     --love.graphics.rectangle('fill', px, py, 16, 30)
+end 
+
+function Player:keypressed(key)
+    local px, py = self.collider:getPosition()
+    if key == 'right' then
+        self.collider:setX(px + self.speed*dt)
+        self.isMoving = true
+        self.direction = 1
+    end
+    if key == 'left' then
+        self.collider:setX(px - self.speed*dt)
+        self.isMoving = true
+        self.direction = -1
+    end
+    if key == 'space' then
+        if self.direction == 1 then 
+            local swordcolliders = world:queryRectangleArea(px, py, 20, 2, {'Wood', 'Enemy'})
+            for i,c in ipairs(swordcolliders) do 
+                c:destroy()
+            end 
+        end 
+        if self.direction == -1 then 
+            local swordcolliders = world:queryRectangleArea(px - 16, py, 20, 2, {'Wood','Enemy'})
+            for i,c in ipairs(swordcolliders) do 
+                    c:destroy()
+            end 
+        end 
+    end 
+    if love.keyboard.isDown('space') then
+        if Player.grounded then
+            Player.collider:applyLinearImpulse(0, -200)
+        end
+    end
 end 

@@ -1,24 +1,54 @@
--- file for wood that is breakable and destroyable will drop one wood to add 
+-- wood.lua
 
-woods = {}
+local Wood = {}
+Wood.__index = Wood
+
+function Wood.new(x, y, width, height)
+    local wood = setmetatable({}, Wood)
+    wood.collider = world:newRectangleCollider(x, y, width, height, {collision_class = "Wood"})
+    wood.collider:setObject(wood)
+    wood.dead = false
+    return wood
+end
+
+function Wood:update(dt)
+    -- Additional wood update logic
+end
+
+function Wood:draw()
+    -- Additional wood draw logic
+end
+
+-- Create and manage woods
+local woods = {}
 
 function spawnWood(x, y, width, height)
-    local wood = {}
-    local woodCollider = world:newRectangleCollider(x, y, width, height, {collision_class = "Wood"})
-    woodCollider:setObject(self)
-    wood.dead = false
-    woodCollider:setType('static')
+    local wood = Wood.new(x, y, width, height)
     table.insert(woods, wood)
-end 
+end
 
-function woods:update(dt)
-    local i = #woods
-    for i=#woods,1,-1 do
-        local w = woods[i]
-        if w.dead == true then
+function updateWoods(dt)
+    for i = #woods, 1, -1 do
+        local wood = woods[i]
+        wood:update(dt)
+        -- Additional wood update logic
+        
+        if wood.dead then
+            wood.collider:destroy()
             table.remove(woods, i)
         end
     end
-end 
+end
 
+function drawWoods()
+    for i, wood in ipairs(woods) do
+        wood:draw()
+    end
+end
+
+return {
+    spawnWood = spawnWood,
+    updateWoods = updateWoods,
+    drawWoods = drawWoods
+}
 

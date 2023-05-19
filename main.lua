@@ -23,19 +23,22 @@ EXTEND GAME WORLD
 REFACTORING!!!!!!!!
     - MAKE CODE CLEANER AND EASY TO READ FOR MYSELF IN FUTURE.
     - MAIN.LUA SHOULD BE CLEAN AND FUNCTIONAL.
+    - We can also try to go for oop we will have to think on it more.
+
 
 --]]
 
 require('require')
 
 function love.load()
+    requireFiles()
+    -- should move this into its own file
     wf = require 'libraries/windfield/windfield'
     world = wf.newWorld(0, 800, false)
     world:setQueryDebugDrawing(true)
-
-    -- cleaner functions
-    requireFiles()
+    
     createCollisionClasses()
+
     sprites = {}
     sprites.enemy = love.graphics.newImage('art/enemy2.png')
 
@@ -57,6 +60,8 @@ function love.load()
         data()
     end
 
+    Player = Player(500, 100)
+ 
     -- loads the map from the save data 
     loadMap(saveData.currentLevel)
 end 
@@ -65,12 +70,12 @@ function love.update(dt)
     -- update functions 
     world:update(dt)
     gameMap:update(dt)
-    player:update(dt)
-    woods:update(dt)
-    enemies:update(dt)
+    Player:update(dt)
+    updateWoods(dt)
+    updateEnemies(dt)
 
-    local px, py = player:getPosition()
-    cam:lookAt(px*2, love.graphics.getHeight()/2 - 130)
+    local px, py = Player.collider.body:getPosition()
+    cam:lookAt(px*2, py*2)
 
 end 
 
@@ -78,18 +83,36 @@ function love.draw()
     cam:attach()
         love.graphics.scale(2, 2)
         gameMap:drawLayer(gameMap.layers["Tile Layer 1"])
-        player:draw()
+        Player:draw()
         world:draw()
-        enemies:draw()
+        drawEnemies()
+        drawWoods()
     cam:detach()
+
+
+    -- debug ignore 
+    love.graphics.print("Current FPS: "..tostring(love.timer.getFPS( )), 10, 10)
+    love.graphics.print("Player.x: "..tostring(Player.x), 10, 25)
+    love.graphics.print("Player.y: "..tostring(Player.y), 10, 40)
 end 
 
-function love.keypressed(key)
+function love.keypressed(key, dt)
     if key == 'up' then
-        if player.grounded then
-            player:applyLinearImpulse(0, -200)
+        if Player.grounded then
+            Player.collider:applyLinearImpulse(0, -200)
         end
     end
+
+    --[[if key == 'left' then 
+        if Player.collider.body then 
+            Player.x = Player.x + 20 * Player.speed*dt
+        end 
+    end ]]
+
+    -- We will make this key go to a menu but that is for later
+    if key == 'escape' then 
+        love.event.quit()
+    end 
 end 
 
 -- We could possibly create a function that can make the process of spawning in collision classes less tedious. 
@@ -128,11 +151,13 @@ function loadMap(mapName)
     gameMap = sti("maps/" .. mapName .. ".lua")
     
     for i, obj in pairs(gameMap.layers["start"].objects) do
-        playerStartX = obj.x
-        playerStartY = obj.y
+        Player.startX = obj.x
+        Player.startY = obj.y
     end
 
-    player:setPosition(playerStartX, playerStartY)
+
+
+    --Player.collider:setPosition(Player.startX, Player.startY)
     
     for i, obj in pairs(gameMap.layers["Ground"].objects) do
         spawnGround(obj.x, obj.y, obj.width, obj.height)
@@ -143,8 +168,7 @@ function loadMap(mapName)
     end 
     
     for i, obj in pairs (gameMap.layers["Wood"].objects) do 
-        spawnWood(obj.x, obj.y, obj.width, obj.height)
-        local wx, wy = obj.x, obj.y     
+        spawnWood(obj.x, obj.y, obj.width, obj.height)   
     end 
 
     for i, obj in pairs (gameMap.layers["Enemies"].objects) do 
