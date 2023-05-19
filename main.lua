@@ -61,6 +61,7 @@ function love.load()
     end
 
     Player = Player(500, 100)
+    Enemy = Enemy(200, 200, 30, 30)
  
     -- loads the map from the save data 
     loadMap(saveData.currentLevel)
@@ -71,8 +72,8 @@ function love.update(dt)
     world:update(dt)
     gameMap:update(dt)
     Player:update(dt)
+    Enemy:update(dt)
     updateWoods(dt)
-    updateEnemies(dt)
 
     local px, py = Player.collider.body:getPosition()
     cam:lookAt(px*2, py*2)
@@ -85,7 +86,7 @@ function love.draw()
         gameMap:drawLayer(gameMap.layers["Tile Layer 1"])
         Player:draw()
         world:draw()
-        drawEnemies()
+        Enemy:draw()
         drawWoods()
     cam:detach()
 
@@ -97,18 +98,6 @@ function love.draw()
 end 
 
 function love.keypressed(key, dt)
-    if key == 'up' then
-        if Player.grounded then
-            Player.collider:applyLinearImpulse(0, -200)
-        end
-    end
-
-    --[[if key == 'left' then 
-        if Player.collider.body then 
-            Player.x = Player.x + 20 * Player.speed*dt
-        end 
-    end ]]
-
     -- We will make this key go to a menu but that is for later
     if key == 'escape' then 
         love.event.quit()
@@ -118,6 +107,8 @@ end
 -- We could possibly create a function that can make the process of spawning in collision classes less tedious. 
 -- I think a possible solution could be to abstract the spawn process more and make it its own file. 
 -- TODO: CREATE COLLISION CLASS SPAWNING FUNCTION
+
+-- collider spawning function
 function spawnGround(x, y, width, height)
     local ground = world:newRectangleCollider(x, y, width, height, {collision_class = "Ground"})
     ground:setType('static')
@@ -155,10 +146,6 @@ function loadMap(mapName)
         Player.startY = obj.y
     end
 
-
-
-    --Player.collider:setPosition(Player.startX, Player.startY)
-    
     for i, obj in pairs(gameMap.layers["Ground"].objects) do
         spawnGround(obj.x, obj.y, obj.width, obj.height)
     end
@@ -169,9 +156,5 @@ function loadMap(mapName)
     
     for i, obj in pairs (gameMap.layers["Wood"].objects) do 
         spawnWood(obj.x, obj.y, obj.width, obj.height)   
-    end 
-
-    for i, obj in pairs (gameMap.layers["Enemies"].objects) do 
-        spawnEnemy(obj.x, obj.y, obj.width, obj.height, obj.args)
     end 
 end

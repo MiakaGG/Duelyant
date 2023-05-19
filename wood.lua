@@ -1,5 +1,7 @@
 -- wood.lua
 
+-- TODO: Refactor this and make it an object could possibly just get rid of it for now 
+
 local Wood = {}
 Wood.__index = Wood
 

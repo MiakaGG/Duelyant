@@ -12,5 +12,4 @@ function requireFiles()
     require('wood')
     require('enemy')
     require('collisionclasses')
-    require('camera')
 end 
