@@ -32,6 +32,6 @@ end
 
 function Enemy:draw()
     if self.collider.body then
-        self.animation:draw(self.img, self.x - self.width / 3, self.y - self.height) --, nil, self.dir, 1)
+        self.animation:draw(self.img, self.x - self.width / 3, self.y - self.height/2) --, nil, self.dir, 1)
     end 
 end 
