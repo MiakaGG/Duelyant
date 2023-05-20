@@ -20,22 +20,18 @@ function Enemy:update(dt)
     self.animation:update(dt)
     -- Additional enemy update logic
     if self.collider.body then 
-        local ex, ey = self.collider:getPosition()
-        
-        local colliders = world:queryRectangleArea(self.x + 9, self.y + 4, 8, 2, {'Ground', 'Wood', 'Player'})
-        if colliders == 0 or 3 then 
+        local colliders = world:queryRectangleArea(self.collider:getX() + (15 * self.dir), self.collider:getY(), 5, 2, {'Ground', 'Wood'})
+        if #colliders == 1 then 
             self.dir = self.dir * -1 
-        end 
+        end
 
-        self.collider:setX(ex + self.speed * dt * self.dir)
+        self.collider:setX(self.collider:getX() + self.speed * dt * self.dir)
+        self.x, self.y = self.collider:getX(), self.collider:getY()
     end
 end
 
 function Enemy:draw()
-    for i, enemy in ipairs(Enemy) do
-        self.animation:draw(self.img, self.x, self.y, nil, self.dir, 1)
-        -- Additional enemy draw logic
-    end
+    if self.collider.body then
+        self.animation:draw(self.img, self.x - self.width / 3, self.y - self.height) --, nil, self.dir, 1)
+    end 
 end 
-
-local enemies = {}

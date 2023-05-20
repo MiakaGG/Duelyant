@@ -25,7 +25,7 @@ REFACTORING!!!!!!!!
     - MAIN.LUA SHOULD BE CLEAN AND FUNCTIONAL.
     - We can also try to go for oop we will have to think on it more.
 
-
+TODO: FIX FLICKERING
 --]]
 
 require('require')
@@ -41,10 +41,16 @@ function love.load()
 
     sprites = {}
     sprites.enemy = love.graphics.newImage('art/enemy2.png')
+    sprites.player = love.graphics.newImage('art/player.png')
 
     local enemyGrid = anim8.newGrid(16, 32, sprites.enemy:getWidth(), sprites.enemy:getHeight())
+    local grid = anim8.newGrid(32, 40, sprites.player:getWidth(), sprites.enemy:getHeight())
     
     animations = {}
+    animations.idle = anim8.newAnimation(grid('1-2',1), 1)
+    animations.walk = anim8.newAnimation(grid('2-4',1), 0.2)
+    animations.jump = anim8.newAnimation(grid('5-8',1), 0.5)
+    animations.swing = anim8.newAnimation(grid('9-10',1), 0.5)
     animations.enemy = anim8.newAnimation(enemyGrid('1-2',1), 0.05)
 
     cam = cameraFile()
@@ -76,7 +82,7 @@ function love.update(dt)
     updateWoods(dt)
 
     local px, py = Player.collider.body:getPosition()
-    cam:lookAt(px*2, py*2)
+    cam:lookAt(px*2, py)
 
 end 
 
@@ -84,12 +90,12 @@ function love.draw()
     cam:attach()
         love.graphics.scale(2, 2)
         gameMap:drawLayer(gameMap.layers["Tile Layer 1"])
+        gameMap:drawLayer(gameMap.layers["waterlayer"])
         Player:draw()
-        world:draw()
+        --world:draw()
         Enemy:draw()
         drawWoods()
     cam:detach()
-
 
     -- debug ignore 
     love.graphics.print("Current FPS: "..tostring(love.timer.getFPS( )), 10, 10)
